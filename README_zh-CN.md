@@ -73,6 +73,7 @@ bash run.sh \
 | 长时序动作控制（T2V） | [case3_action_t2v.jsonl](examples/case3_action_t2v.jsonl) | `bash run.sh ... --messages examples/case3_action_t2v.jsonl --output-dir outputs/case3` |
 | 图像与动作联合控制（TI2V） | [case4_action_ti2v.jsonl](examples/case4_action_ti2v.jsonl) | `bash run.sh ... --messages examples/case4_action_ti2v.jsonl --output-dir outputs/case4` |
 | 运行中切换提示词（T2V） | [case6_prompt_switch_t2v.jsonl](examples/case6_prompt_switch_t2v.jsonl) | `bash run.sh ... --messages examples/case6_prompt_switch_t2v.jsonl --output-dir outputs/case6` |
+| 按键与提示词切换联合控制（T2V） | [case7_action_prompt_switch_t2v.jsonl](examples/case7_action_prompt_switch_t2v.jsonl) | `bash run.sh ... --messages examples/case7_action_prompt_switch_t2v.jsonl --output-dir outputs/case7` |
 
 请将命令中的 `...` 替换为“快速开始”所示的 `--pretrained-dir` 和 `--checkpoint` 参数。
 

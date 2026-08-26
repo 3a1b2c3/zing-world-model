@@ -73,6 +73,7 @@ Every JSONL file under `examples/` defines a complete world rollout and can be p
 | Long action T2V rollout | [case3_action_t2v.jsonl](examples/case3_action_t2v.jsonl) | `bash run.sh ... --messages examples/case3_action_t2v.jsonl --output-dir outputs/case3` |
 | Action TI2V rollout | [case4_action_ti2v.jsonl](examples/case4_action_ti2v.jsonl) | `bash run.sh ... --messages examples/case4_action_ti2v.jsonl --output-dir outputs/case4` |
 | Prompt-switched T2V rollout | [case6_prompt_switch_t2v.jsonl](examples/case6_prompt_switch_t2v.jsonl) | `bash run.sh ... --messages examples/case6_prompt_switch_t2v.jsonl --output-dir outputs/case6` |
+| Combined action + prompt-switch T2V rollout | [case7_action_prompt_switch_t2v.jsonl](examples/case7_action_prompt_switch_t2v.jsonl) | `bash run.sh ... --messages examples/case7_action_prompt_switch_t2v.jsonl --output-dir outputs/case7` |
 
 Replace `...` with the same `--pretrained-dir` and `--checkpoint` arguments shown in Quick Start.
 
