@@ -4,7 +4,7 @@
 
 # Zing-0.5: An Efficient Real-Time Interactive World Model
 
-<a href="assets/case0.mp4"><img src="assets/case0.jpg" alt="Play Zing interactive world model case 0" title="Click to play" width="30%"></a>&emsp;<a href="assets/case1.mp4"><img src="assets/case1.jpg" alt="Play Zing interactive world model case 1" title="Click to play" width="30%"></a>&emsp;<a href="assets/case2.mp4"><img src="assets/case2.jpg" alt="Play Zing interactive world model case 2" title="Click to play" width="30%"></a>
+<a href="https://cdn.jsdelivr.net/gh/seedleap/zing-world-model@main/assets/case0.mp4"><img src="assets/case0.jpg" alt="Play Zing interactive world model case 0" title="Click to play" width="30%"></a>&emsp;<a href="https://cdn.jsdelivr.net/gh/seedleap/zing-world-model@main/assets/case1.mp4"><img src="assets/case1.jpg" alt="Play Zing interactive world model case 1" title="Click to play" width="30%"></a>&emsp;<a href="https://cdn.jsdelivr.net/gh/seedleap/zing-world-model@main/assets/case2.mp4"><img src="assets/case2.jpg" alt="Play Zing interactive world model case 2" title="Click to play" width="30%"></a>
 
 [English](README.md) | [简体中文](README_zh-CN.md)
 
