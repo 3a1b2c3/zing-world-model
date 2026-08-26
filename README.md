@@ -38,6 +38,7 @@ Zing-0.5/
 
 ## News
 
+- [Aug 26, 2026]: Zing-0.5 ranks No. 2 overall on the [WBench leaderboard](https://meituan-longcat.github.io/WBench/#leaderboard) and No. 1 among real-time world models. 🏆
 - [Aug 26, 2026]: Zing-0.5 is released. 🎉
 
 ## Requirements
