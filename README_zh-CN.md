@@ -38,7 +38,8 @@ Zing-0.5/
 
 ## 新闻
 
-- [Aug 26, 2026]: Zing-0.5 正式发布。🎉
+- [2026 年 8 月 26 日]：Zing-0.5 位列 [WBench 总榜](https://meituan-longcat.github.io/WBench/#leaderboard)第二，并在实时世界模型中排名第一。🏆
+- [2026 年 8 月 26 日]：Zing-0.5 正式发布。🎉
 
 ## 环境要求
 
