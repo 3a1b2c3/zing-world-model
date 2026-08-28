@@ -30,8 +30,8 @@ if errorlevel 1 exit /b 1
 pip install --upgrade pip setuptools wheel
 if errorlevel 1 exit /b 1
 
-echo Installing torch with CUDA 12.8...
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+echo Installing torch with CUDA 12.1...
+pip install torch==2.9.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 if errorlevel 1 exit /b 1
 
 echo Installing other dependencies...

@@ -37,7 +37,7 @@ wsl cp -r /mnt/c/workspace/world/zing-world-model/* %WSL_HOME%/ 2>nul
 echo [2/3] Setting up WSL2 venv...
 wsl bash -c "cd %WSL_HOME% && python3.11 -m venv .venv 2>/dev/null || python3 -m venv .venv"
 wsl bash -c "cd %WSL_HOME% && source .venv/bin/activate && pip install --quiet --upgrade pip setuptools wheel"
-wsl bash -c "cd %WSL_HOME% && source .venv/bin/activate && pip install --quiet -q torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121"
+wsl bash -c "cd %WSL_HOME% && source .venv/bin/activate && pip install --quiet -q torch==2.9.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128"
 wsl bash -c "cd %WSL_HOME% && source .venv/bin/activate && pip install --quiet -q -r requirements.txt"
 
 echo [3/3] Running inference...

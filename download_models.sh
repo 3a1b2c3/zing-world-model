@@ -1,5 +1,5 @@
-#!/bin/bash
 # Download zing-world-model pretrained weights
+
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,8 +31,7 @@ hf_token = os.environ.get("HF_TOKEN")
 models_dir = os.path.join(os.path.dirname(__file__), "pretrained_models")
 
 try:
-    # Try downloading from HF repo (adjust repo name as needed)
-    repo_id = "zingai/zing-world-model-0.5"  # Update with actual repo
+    repo_id = "seedleap/zing-0.5"
     snapshot_download(
         repo_id,
         cache_dir=models_dir,
