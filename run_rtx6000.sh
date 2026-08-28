@@ -8,63 +8,32 @@ cd "$(dirname "$0")"
 PRETRAINED_DIR="$(pwd)/pretrained_models"
 OUTPUT_DIR="$(pwd)/outputs"
 
-# Find the snapshot directory in HuggingFace cache
-find_snapshot_dir() {
-    local search_dir="$1"
-
-    # Check if pretrained/ exists directly (already extracted at root)
-    if [ -d "$search_dir/pretrained/text_encoder" ]; then
-        echo "$search_dir"
-        return 0
-    fi
-
-    # Search in HuggingFace cache: models--seedleap--zing-0.5/snapshots/<hash>/pretrained/
-    if [ -d "$search_dir/models--seedleap--zing-0.5" ]; then
-        local latest=$(find "$search_dir/models--seedleap--zing-0.5/snapshots" -maxdepth 1 -type d | sort -r | head -1)
-        if [ -d "$latest/pretrained/text_encoder" ]; then
-            echo "$latest"
-            return 0
-        fi
-    fi
-
-    return 1
-}
-
 if [ ! -d "$PRETRAINED_DIR" ]; then
-    echo "ERROR: Models directory not found at $PRETRAINED_DIR"
+    echo "ERROR: pretrained_models/ not found"
     exit 1
 fi
 
-SNAPSHOT_DIR=$(find_snapshot_dir "$PRETRAINED_DIR") || {
+# Find the latest snapshot in HuggingFace cache
+SNAPSHOT_DIR=$(find "$PRETRAINED_DIR/models--seedleap--zing-0.5/snapshots" -maxdepth 1 -type d -name "[a-f0-9]*" 2>/dev/null | sort -r | head -1)
+
+if [ -z "$SNAPSHOT_DIR" ] || [ ! -d "$SNAPSHOT_DIR/pretrained/text_encoder" ]; then
     echo "ERROR: Could not find Zing-0.5 models"
-    echo "Expected: pretrained/text_encoder/, pretrained/tokenizer/, pretrained/vae/, generator/model.pt"
-    echo ""
-    echo "Current contents:"
-    ls -la "$PRETRAINED_DIR" 2>/dev/null || true
+    echo "Run: python -c \"from huggingface_hub import snapshot_download; snapshot_download('seedleap/zing-0.5', cache_dir='./pretrained_models', token='\$HF_TOKEN')\""
     exit 1
-}
+fi
 
 PRETRAINED_PATH="$SNAPSHOT_DIR/pretrained"
 CHECKPOINT_PATH="$SNAPSHOT_DIR/generator/model.pt"
 
-if [ ! -d "$PRETRAINED_PATH/text_encoder" ]; then
-    echo "ERROR: text_encoder/ not found at $PRETRAINED_PATH"
-    exit 1
-fi
-
-if [ ! -f "$CHECKPOINT_PATH" ]; then
-    echo "ERROR: generator/model.pt not found at $CHECKPOINT_PATH"
-    exit 1
-fi
+mkdir -p "$OUTPUT_DIR"
 
 mkdir -p "$OUTPUT_DIR"
 
 echo "=========================================="
 echo "Zing-0.5 on RTX 6000 (48GB)"
 echo "=========================================="
-echo "Pretrained: $PRETRAINED_PATH"
-echo "Checkpoint: $CHECKPOINT_PATH"
-echo "Output: $OUTPUT_DIR"
+echo "Snapshot: $SNAPSHOT_DIR"
+echo "Output: $OUTPUT_DIR/case3_rtx6000"
 echo ""
 
 # Activate venv if it exists
@@ -86,5 +55,5 @@ python -m zing_v0_5 \
   --seed 0
 
 echo ""
-echo "Done! Output saved to: $OUTPUT_DIR/case3_rtx6000"
+echo "✓ Done! Output: $OUTPUT_DIR/case3_rtx6000"
 echo ""
