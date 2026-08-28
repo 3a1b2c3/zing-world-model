@@ -1,7 +1,6 @@
 accelerate==1.13.0
 av==13.1.0
 diffusers==0.35.0
-flash-attn==2.8.3.post1
 numpy==2.2.6
 pillow==11.3.0
 PyYAML==6.0.3
