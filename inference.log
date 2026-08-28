@@ -1,0 +1,22 @@
+﻿==========================================
+Zing-0.5 on RTX 5090 (32GB)
+==========================================
+
+Snapshot: C:\workspace\world\zing-world-model\pretrained_models\models--seedleap--zing-0.5\snapshots\b7a6f480d5f36ec6a1e82a489cde8d8305a28438
+Output: C:\workspace\world\zing-world-model\outputs\case3_rtx5090
+
+Running case3 (long action T2V)...
+
+run_rtx5090_windows.bat : 
+At line:1 char:302
++ ... tch {} } }; & "C:\workspace\world\zing-world-model\run_rtx5090_window ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 155.20it/s]
+The config attributes {'clip_output': False} were passed to AutoencoderKLWan, but are not expected and will be 
+ignored. Please verify your config.json configuration file.
+
+ERROR: Inference failed
