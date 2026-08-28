@@ -1,0 +1,2 @@
+{"messages": [{"role": "user", "type": "text", "content": "A serene mountain landscape with clear blue sky and flowing river"}, {"role": "target", "type": "video", "output": {"frames": 100, "height": 576, "width": 1024}}]}
+{"messages": [{"role": "user", "type": "text", "content": "A person walking through a forest with sunlight filtering through trees"}, {"role": "target", "type": "video", "output": {"frames": 100, "height": 576, "width": 1024}}]}
