@@ -75,9 +75,11 @@ class InferencePipeline:
         return output.permute(0, 2, 1, 3, 4)
 
     def generate(self, request: InferenceRequest) -> torch.Tensor:
+        print("📝 Encoding text prompts...", flush=True)
         self.text_encoder.to(self.device)
         contexts = [self.text_encoder.encode([prompt]) for prompt in request.prompts]
         self.text_encoder.to("cpu")
+        print("✓ Text encoding complete", flush=True)
         clean = request.clean_latents.to(device=self.device, dtype=torch.bfloat16)
         mask = request.label_mask.to(device=self.device, dtype=torch.bool)
         action = None if request.action is None else request.action.to(self.device)
@@ -87,10 +89,12 @@ class InferencePipeline:
         boundaries = [0]
         for length in lengths:
             boundaries.append(boundaries[-1] + length)
+        print(f"🎬 Starting inference with {len(request.chunk_spans)} chunks...", flush=True)
         cache = self.generator.make_kv_cache()
         segment = 0
         last_end = request.chunk_spans[-1][1]
-        for start, end in request.chunk_spans:
+        for chunk_idx, (start, end) in enumerate(request.chunk_spans, 1):
+            print(f"  Chunk {chunk_idx}/{len(request.chunk_spans)}: frames {start}-{end}", flush=True)
             previous_segment = segment
             while segment + 1 < len(contexts) and start >= boundaries[segment + 1]:
                 segment += 1
@@ -140,9 +144,11 @@ class InferencePipeline:
                 self._model_flow(current, zero, context, cache, "final", current_action, False)
         del contexts, cache, latents, clean, mask, action
         torch.cuda.empty_cache()
+        print("🎨 Decoding to video...", flush=True)
         self.vae.to(self.device)
         try:
             video = self.vae.decode(output)
+            print("✓ Video decode complete", flush=True)
             return (video * 0.5 + 0.5).clamp(0, 1).cpu()
         finally:
             self.vae.to("cpu")

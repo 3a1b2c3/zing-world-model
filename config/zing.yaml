@@ -30,6 +30,6 @@ inference:
   num_timesteps: 1000
   timestep_shift: 5.0
   denoising_steps: [1000, 750, 500, 250]
-  frames_per_block: 4
+  frames_per_block: 2
   output_fps: 24
   deterministic_attention: false
