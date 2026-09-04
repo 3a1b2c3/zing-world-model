@@ -1,5 +1,15 @@
 #!/bin/bash
-# Setup Python venv for zing-world-model (Python 3.11 required)
+# Setup Python venv for zing-world-model.
+#
+# Deviates from the original script in two ways, both for this specific
+# GB300 box (aarch64, CUDA 13.2), matching fixes already applied tonight to
+# MIND/H3-World's setup scripts on the same machine:
+#   1. No hardcoded python3.11 + unprompted `sudo apt install` fallback --
+#      uses whatever python3 is already on PATH instead.
+#   2. torch/torchvision/torchaudio from cu132, unpinned (not the original's
+#      torch==2.9.1 from cu128) -- a pinned version can silently not exist
+#      on a different CUDA index and pip falls back to something wrong
+#      instead of erroring (confirmed the hard way on H3-World tonight).
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,19 +20,12 @@ echo "Zing World Model - Setup"
 echo "=========================================="
 echo ""
 
-# Check for Python 3.11, install if missing
-if ! command -v python3.11 &> /dev/null; then
-    echo "Python 3.11 not found, installing..."
-    sudo apt update
-    sudo apt install -y python3.11 python3.11-venv
-    if ! command -v python3.11 &> /dev/null; then
-        echo "ERROR: Failed to install Python 3.11"
-        exit 1
-    fi
+if ! command -v python3 &> /dev/null; then
+    echo "ERROR: python3 not found on PATH." >&2
+    exit 1
 fi
 
-echo "Using Python 3.11"
-python3.11 --version
+echo "Using $(python3 --version 2>&1)"
 echo ""
 
 # Remove old venv if it exists
@@ -31,9 +34,9 @@ if [ -d ".venv" ]; then
     rm -rf .venv
 fi
 
-# Create venv with Python 3.11
+# Create venv
 echo "[1/4] Creating Python venv..."
-python3.11 -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 
 echo ""
@@ -41,8 +44,8 @@ echo "[2/4] Upgrading pip, setuptools, wheel..."
 pip install --upgrade pip setuptools wheel
 
 echo ""
-echo "[3/4] Installing PyTorch (cu121 + torchaudio)..."
-pip install torch==2.9.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+echo "[3/4] Installing PyTorch (cu132, unpinned -- see script header)..."
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu132
 
 echo ""
 echo "[4/4] Installing other dependencies..."
