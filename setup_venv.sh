@@ -61,16 +61,12 @@ echo "[5/5] Installing flash-attn (--no-build-isolation, source build)..."
 # source (no prebuilt wheel expected for this aarch64/cu132 combination),
 # so this step is slow.
 #
-# Bumped from the project's original pin (2.6.3) to 2.8.3: 2.6.3's build
-# failed on this box (compiler error, GB300/Blackwell/sm_100 -- exact cause
-# not confirmed since the real error output wasn't captured, but the
-# failure itself plus 2.6.3's age point at missing Blackwell support).
-# 2.8.3 specifically chosen because it's independently confirmed elsewhere
-# in this project's tooling to support Blackwell (sm_120, RTX 5090) --
-# see MIND/.claude/skills/mind-benchmark: "flash_attn 2.8.3+cu128torch2.10
-# -cp310" is the pinned, confirmed-working build for ViPE's own Blackwell
-# setup. Not a guess -- real evidence, just from a different project.
-pip install flash-attn==2.8.3 --no-build-isolation
+# Unpinned (was 2.6.3, then 2.8.3 -- both failed to build on this box; the
+# actual compiler error was never captured/confirmed for either). Left
+# unpinned so pip resolves whatever latest flash-attn release actually
+# supports this exact torch/CUDA/arch combination, rather than guessing at
+# specific version numbers one at a time.
+pip install flash-attn --no-build-isolation
 
 echo ""
 echo "=========================================="
