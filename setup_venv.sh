@@ -48,8 +48,24 @@ echo "[3/4] Installing PyTorch (cu132, unpinned -- see script header)..."
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu132
 
 echo ""
-echo "[4/4] Installing other dependencies..."
+echo "[4/5] Installing other dependencies..."
 pip install -r requirements.txt
+
+echo ""
+echo "[5/5] Installing flash-attn (--no-build-isolation, source build)..."
+# flash-attn's setup.py imports torch at build time to detect CUDA
+# arch/version -- pip's isolated build env doesn't include the venv's
+# packages by default, so a plain `pip install flash-attn` fails with
+# "ModuleNotFoundError: No module named 'torch'" even though torch is
+# already installed above. --no-build-isolation fixes that. Building from
+# source (no prebuilt wheel expected for this aarch64/cu132 combination),
+# so this step is slow. Version pinned to what this project was actually
+# tested against (2.6.3) -- if the build itself fails, or succeeds but
+# doesn't recognize this GPU's compute capability, that's a sign 2.6.3
+# predates Blackwell/GB300 support and a newer flash-attn release may be
+# needed instead; not attempted preemptively since we don't know that's
+# actually the case yet.
+pip install flash-attn==2.6.3 --no-build-isolation
 
 echo ""
 echo "=========================================="
