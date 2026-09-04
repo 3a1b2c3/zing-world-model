@@ -59,13 +59,18 @@ echo "[5/5] Installing flash-attn (--no-build-isolation, source build)..."
 # "ModuleNotFoundError: No module named 'torch'" even though torch is
 # already installed above. --no-build-isolation fixes that. Building from
 # source (no prebuilt wheel expected for this aarch64/cu132 combination),
-# so this step is slow. Version pinned to what this project was actually
-# tested against (2.6.3) -- if the build itself fails, or succeeds but
-# doesn't recognize this GPU's compute capability, that's a sign 2.6.3
-# predates Blackwell/GB300 support and a newer flash-attn release may be
-# needed instead; not attempted preemptively since we don't know that's
-# actually the case yet.
-pip install flash-attn==2.6.3 --no-build-isolation
+# so this step is slow.
+#
+# Bumped from the project's original pin (2.6.3) to 2.8.3: 2.6.3's build
+# failed on this box (compiler error, GB300/Blackwell/sm_100 -- exact cause
+# not confirmed since the real error output wasn't captured, but the
+# failure itself plus 2.6.3's age point at missing Blackwell support).
+# 2.8.3 specifically chosen because it's independently confirmed elsewhere
+# in this project's tooling to support Blackwell (sm_120, RTX 5090) --
+# see MIND/.claude/skills/mind-benchmark: "flash_attn 2.8.3+cu128torch2.10
+# -cp310" is the pinned, confirmed-working build for ViPE's own Blackwell
+# setup. Not a guess -- real evidence, just from a different project.
+pip install flash-attn==2.8.3 --no-build-isolation
 
 echo ""
 echo "=========================================="
