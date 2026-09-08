@@ -4,7 +4,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MODELS_DIR="$HERE/pretrained_models"
+export MODELS_DIR="$HERE/pretrained_models"
 
 echo "=========================================="
 echo "Zing-0.5 Model Download"
@@ -20,7 +20,6 @@ fi
 mkdir -p "$MODELS_DIR"
 
 echo "Downloading to: $MODELS_DIR"
-echo "Token: ${HF_TOKEN:0:10}..."
 echo ""
 
 python3 << 'PYEOF'
@@ -28,7 +27,7 @@ from huggingface_hub import snapshot_download
 import os
 import sys
 
-models_dir = os.path.expandvars("$MODELS_DIR")
+models_dir = os.environ["MODELS_DIR"]
 token = os.environ.get("HF_TOKEN")
 
 if not token:

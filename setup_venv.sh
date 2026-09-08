@@ -66,11 +66,38 @@ echo "[5/5] Installing flash-attn (--no-build-isolation, source build)..."
 # unpinned so pip resolves whatever latest flash-attn release actually
 # supports this exact torch/CUDA/arch combination, rather than guessing at
 # specific version numbers one at a time.
-pip install flash-attn --no-build-isolation
+#
+# Not allowed to abort the script. It is the last step, everything else has
+# already succeeded, and `set -e` would otherwise throw that away over an
+# optional accelerator. The build log is kept because the two previous
+# failures here were never diagnosed -- the compiler error scrolled past and
+# the script died before anything could be read.
+FLASH_LOG="$HERE/flash-attn-build.log"
+if pip install flash-attn --no-build-isolation > "$FLASH_LOG" 2>&1; then
+  echo "      flash-attn installed."
+  rm -f "$FLASH_LOG"
+else
+  echo ""
+  echo "      WARNING: flash-attn failed to build. Everything else is installed."
+  echo "      Full log: $FLASH_LOG"
+  echo ""
+  echo "      Last error lines:"
+  grep -iE "error|Error [0-9]|fatal" "$FLASH_LOG" | tail -15 | sed "s/^/        /"
+  echo ""
+  echo "      Note: src/zing_v0_5/model/attention.py calls flash_attn_varlen_func"
+  echo "      with no fallback, so inference will fail on import until this is"
+  echo "      resolved. FlashAttention 2 targets sm80-sm90; this box is Blackwell,"
+  echo "      so an unsupported-architecture error here is expected rather than a"
+  echo "      misconfiguration."
+fi
 
 echo ""
 echo "=========================================="
-echo "Setup complete!"
+if [ -f "$FLASH_LOG" ]; then
+  echo "Setup complete, except flash-attn (see warning above)."
+else
+  echo "Setup complete!"
+fi
 echo "=========================================="
 echo ""
 echo "Next steps:"
