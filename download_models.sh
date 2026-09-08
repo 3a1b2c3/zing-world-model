@@ -1,52 +1,36 @@
-# Download zing-world-model pretrained weights
-
+#!/bin/bash
+# Download zing-0.5 pretrained weights.
+#
+# A wrapper around _download_models_helper.py, which holds the actual logic --
+# shared with download_models.bat so the two platforms cannot drift apart. The
+# repository previously carried three separate copies of the same
+# snapshot_download call, each with different bugs.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MODELS_DIR="${HERE}/pretrained_models"
-mkdir -p "$MODELS_DIR"
+MODELS_DIR="${MODELS_DIR:-$HERE/pretrained_models}"
 
 echo "=========================================="
-echo "Zing World Model - Download Models"
+echo "Zing-0.5 model download"
 echo "=========================================="
-echo ""
+echo
 
-# Check HF_TOKEN
 if [ -z "${HF_TOKEN:-}" ]; then
-    echo "ERROR: HF_TOKEN not set"
-    echo "Set: export HF_TOKEN=your_huggingface_token"
-    exit 1
+  echo "ERROR: HF_TOKEN is not set." >&2
+  echo "  export HF_TOKEN=<token>" >&2
+  exit 1
 fi
 
-echo "Downloading models to: $MODELS_DIR"
-echo ""
+# The venv's interpreter when it exists, so huggingface_hub is found without
+# the caller having to activate anything first.
+PYTHON="$HERE/.venv/bin/python"
+if [ ! -x "$PYTHON" ]; then
+  PYTHON="$(command -v python3 || command -v python)"
+fi
 
-# Download base model
-echo "[1/2] Downloading zing-0.5 base model..."
-python << 'PYEOF'
-from huggingface_hub import snapshot_download
-import os
+"$PYTHON" "$HERE/_download_models_helper.py" "$MODELS_DIR"
 
-hf_token = os.environ.get("HF_TOKEN")
-models_dir = os.path.join(os.path.dirname(__file__), "pretrained_models")
-
-try:
-    repo_id = "seedleap/zing-0.5"
-    snapshot_download(
-        repo_id,
-        cache_dir=models_dir,
-        token=hf_token,
-        resume_download=True
-    )
-    print(f"✓ Downloaded {repo_id}")
-except Exception as e:
-    print(f"Note: {e}")
-    print("Model repo may not be available yet. Check HF for availability.")
-PYEOF
-
-echo ""
-echo "[2/2] Setup complete!"
-echo ""
-echo "Models downloaded to: $MODELS_DIR"
-echo "Next: bash run_example.sh"
-echo ""
+echo
+echo "=========================================="
+echo "Next: bash run_rtx5090.sh"
+echo "=========================================="

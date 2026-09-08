@@ -61,11 +61,28 @@ echo "[5/5] Installing flash-attn (--no-build-isolation, source build)..."
 # source (no prebuilt wheel expected for this aarch64/cu132 combination),
 # so this step is slow.
 #
-# Unpinned (was 2.6.3, then 2.8.3 -- both failed to build on this box; the
-# actual compiler error was never captured/confirmed for either). Left
-# unpinned so pip resolves whatever latest flash-attn release actually
-# supports this exact torch/CUDA/arch combination, rather than guessing at
-# specific version numbers one at a time.
+# FLASH_ATTENTION_FORCE_BUILD=TRUE is what makes this a source build at all.
+# Without it flash-attn's setup.py downloads a prebuilt wheel from its GitHub
+# releases whenever one matches the Python/CUDA/platform triple. Those wheels
+# are linked against whichever torch they were built with, so on a venv with a
+# different torch the install *succeeds in seconds* and then fails at import:
+#
+#   ImportError: flash_attn_2_cuda...so: undefined symbol:
+#   _ZN3c104cuda29c10_cuda_check_implementationEiPKcS2_jb
+#
+# which is c10::cuda::c10_cuda_check_implementation -- a torch symbol whose
+# signature changed between versions. An instantaneous install here is the
+# tell; a real build takes 20-40 minutes.
+#
+# --no-cache-dir for the same reason one level up: pip will otherwise reuse a
+# wheel it cached from an earlier run against a different torch.
+#
+# Unpinned (was 2.6.3, then 2.8.3). Both were recorded as "failed to build"
+# with no compiler error ever captured -- plausibly this same silent wheel
+# mismatch rather than a compile failure, since 2.8.3.post1 does build here.
+#
+# MAX_JOBS caps compile parallelism; the default can exhaust memory on this
+# box. Raise it if there is headroom.
 #
 # Not allowed to abort the script. It is the last step, everything else has
 # already succeeded, and `set -e` would otherwise throw that away over an
