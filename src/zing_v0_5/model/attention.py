@@ -7,6 +7,17 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# Optional. flash-attn ships prebuilt wheels linked against a specific torch
+# ABI, so on a venv with a different torch it imports with
+# "undefined symbol: _ZN3c104cuda29c10_cuda_check_implementation..." -- and no
+# release on PyPI is currently built against torch 2.14. Absent it, the varlen
+# path below falls back to padded SDPA, which is slower on ragged batches but
+# has no build step and tracks whatever torch is installed.
+try:
+    from flash_attn import flash_attn_varlen_func
+except ImportError:
+    flash_attn_varlen_func = None
+
 
 os.environ.setdefault("TRITON_MAX_BLOCK_X", "8192")
 torch._dynamo.config.cache_size_limit = 1024
@@ -79,6 +90,66 @@ def apply_rope(value: torch.Tensor, rope: torch.Tensor) -> torch.Tensor:
     return rotated.flatten(-2).to(value.dtype)
 
 
+def _sdpa_varlen(
+    query: torch.Tensor,
+    key: torch.Tensor,
+    value: torch.Tensor,
+    query_lengths: torch.Tensor,
+    key_lengths: torch.Tensor,
+) -> torch.Tensor:
+    """Variable-length attention via padded SDPA, for when flash-attn is absent.
+
+    Inputs and output are packed the way flash_attn_varlen_func expects:
+    (total_tokens, heads, head_dim), with per-sequence lengths given separately.
+    Sequences are padded to the batch maximum, attended with a mask that keeps
+    padding out of the softmax, then repacked.
+
+    Memory cost is the padding: a batch whose lengths vary widely allocates
+    batch * max_len rather than the sum of lengths. That is the whole reason the
+    varlen kernel exists, so this is a fallback rather than an equivalent.
+    """
+    batch = query_lengths.numel()
+    max_query = int(query_lengths.max().item())
+    max_key = int(key_lengths.max().item())
+    heads, head_dim = query.shape[-2], query.shape[-1]
+
+    padded_query = query.new_zeros((batch, max_query, heads, head_dim))
+    padded_key = key.new_zeros((batch, max_key, heads, head_dim))
+    padded_value = value.new_zeros((batch, max_key, heads, head_dim))
+    # Built as a boolean keep-mask over (batch, 1, query, key); the head axis
+    # broadcasts. False entries are excluded from the softmax entirely, which
+    # is what stops padded keys contributing.
+    mask = torch.zeros((batch, 1, max_query, max_key), dtype=torch.bool, device=query.device)
+
+    query_offset = 0
+    key_offset = 0
+    for index in range(batch):
+        query_length = int(query_lengths[index].item())
+        key_length = int(key_lengths[index].item())
+        padded_query[index, :query_length] = query[query_offset:query_offset + query_length]
+        padded_key[index, :key_length] = key[key_offset:key_offset + key_length]
+        padded_value[index, :key_length] = value[key_offset:key_offset + key_length]
+        mask[index, 0, :query_length, :key_length] = True
+        query_offset += query_length
+        key_offset += key_length
+
+    # SDPA wants (batch, heads, sequence, head_dim).
+    attended = F.scaled_dot_product_attention(
+        padded_query.transpose(1, 2),
+        padded_key.transpose(1, 2),
+        padded_value.transpose(1, 2),
+        attn_mask=mask,
+    ).transpose(1, 2)
+
+    packed = query.new_empty(query.shape)
+    query_offset = 0
+    for index in range(batch):
+        query_length = int(query_lengths[index].item())
+        packed[query_offset:query_offset + query_length] = attended[index, :query_length]
+        query_offset += query_length
+    return packed
+
+
 def flash_attention_varlen(
     query: torch.Tensor,
     key: torch.Tensor,
@@ -87,7 +158,8 @@ def flash_attention_varlen(
     key_lengths: torch.Tensor,
     deterministic: bool,
 ) -> torch.Tensor:
-    from flash_attn import flash_attn_varlen_func
+    if flash_attn_varlen_func is None:
+        return _sdpa_varlen(query, key, value, query_lengths, key_lengths)
 
     cumulative_query = F.pad(query_lengths.to(torch.int32).cumsum(0), (1, 0)).to(torch.int32)
     cumulative_key = F.pad(key_lengths.to(torch.int32).cumsum(0), (1, 0)).to(torch.int32)
